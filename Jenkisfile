@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+    tools { 
+        maven 'apache-maven-3.8.1' 
+        jdk 'jdk-16.0.1' 
+    }
+    stages{
+        stage("Code Checkout in SCM"){
+            steps{
+                git 'https://github.com/Sanjay-Harsora1985/HelloWorld-Springboot.git'
+            }
+        }
+        stage("Build Maven Code"){
+            steps{
+                powershell 'mvn clean install'
+                }
+            }
+        stage("Build Docker Image"){
+            steps{
+                powershell 'docker build -t sharsora1985/my-spring-boot:0.0.3 .'
+                }
+            }
+        stage("Push into Docker Hub"){
+            steps{
+                withCredentials([string(credentialsId: 'docker_password', variable: 'docker_password')])
+                {
+                powershell "docker login -u sharsora1985 -p ${docker_password}"
+				}
+				powershell 'docker push sharsora1985/my-spring-boot:0.0.3'
+            }
+        }
+        stage("Deploy Helm Chart into OpenShift"){
+            steps{
+                powershell 'oc.exe projects'
+                powershell 'helm-windows-amd64.exe list -a'
+                powershell 'helm-windows-amd64.exe lint newproject'
+                powershell 'helm-windows-amd64.exe install hello-spring newproject'
+                powershell 'oc.exe expose service/hello-spring-newproject'
+                powershell 'oc.exe get all'
+                }
+            }
+    }
+}
