@@ -17,7 +17,7 @@ pipeline {
             }
         stage("Build Docker Image"){
             steps{
-                powershell 'docker build -t sharsora1985/my-spring-boot:0.0.3 .'
+                powershell 'docker build -t sharsora1985/my-spring-boot:0.0.4 .'
                 }
             }
         stage("Push into Docker Hub"){
@@ -26,7 +26,7 @@ pipeline {
                 {
                 powershell "docker login -u sharsora1985 -p ${docker_password}"
 				}
-				powershell 'docker push sharsora1985/my-spring-boot:0.0.3'
+				powershell 'docker push sharsora1985/my-spring-boot:0.0.4'
             }
         }
         stage("Deploy Helm Chart into OpenShift"){
